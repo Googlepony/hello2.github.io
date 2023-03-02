@@ -5,6 +5,5 @@
     ],
     "routes": [
       {"src": "/convert", "methods": ["POST"], "dest": "index.js"}
-    ],
-    "files": ["uploads"]
-  }
+    ]
+}
