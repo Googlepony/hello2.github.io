@@ -1,45 +1,46 @@
-const express = require('express');
-const fileUpload = require('express-fileupload');
 const tabula = require('tabula-js');
 const fs = require('fs');
-const path = require('path');
 const os = require('os');
-const app = express();
-const tmpDir = '/tmp/uploads';
-if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir);
-}
-app.use(fileUpload());
-app.get('/', (req, res) => {
-    res.send('Get - Working');
-});
-app.post('/upload', (req, res) => {
-    const files = req.files;
-    if (!files) {
-        return res.status(400).send('No files were uploaded.');
+const path = require('path');
+const PDFDocument = require('pdfkit');
+
+module.exports = async (req, res) => {
+    const file = req.files && req.files.pdf;
+    if (!file || file.mimetype !== 'application/pdf') {
+        return res.status(400).send('Only PDF files are allowed.');
     }
-    for (const key in files) {
-        const file = files[key];
-        if (file.mimetype !== 'application/pdf') {
-            return res.status(400).send('Only PDF files are allowed.');
+
+    const tmpDir = path.join(os.tmpdir(), 'pdfs');
+    if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir);
+    }
+
+    const fileName = `${file.name}-${Date.now()}`;
+    const pdfPath = path.join(tmpDir, fileName);
+    const csvPath = path.join(tmpDir, `${fileName}.csv`);
+
+    file.mv(pdfPath, async err => {
+        if (err) {
+            return res.status(500).send(err);
         }
-        const fileName = `${file.name}-${Date.now()}`;
-        const filePath = path.join(tmpDir, fileName);
-        const outputPath = path.join(tmpDir, `${fileName}.csv`);
-        file.mv(filePath, err => {
-            if (err) { return res.status(500).send(err); }
-            const stream = tabula(filePath, { pages: "all", area: "80, 30, 1080 , 810" }).streamCsv();
-            stream.pipe(fs.createWriteStream(outputPath));
-            stream.on('end', () => {
-                fs.readFile(outputPath, 'utf-8', (err, data) => {
-                    if (err) { return res.status(500).send(err); }
-                    res.send(data);
-                });
+
+        const doc = new PDFDocument();
+        let writeStream = fs.createWriteStream(pdfPath);
+        doc.pipe(writeStream);
+        doc.end();
+
+        writeStream.on('finish', async () => {
+            const stream = tabula(pdfPath, { pages: 'all', area: '80, 30, 1080 , 810' }).streamCsv();
+            stream.pipe(fs.createWriteStream(csvPath));
+            stream.on('end', async () => {
+                const csvData = fs.readFileSync(csvPath, 'utf-8');
+
+                res.send(csvData);
             });
         });
-    }
-});
-app.listen(process.env.PORT || 3000, () => console.log('Server started'));
+    });
+};
+
 
 
 
