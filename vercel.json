@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/pdf-to-csv": {
+    "api/index": {
       "runtime": "vercel-node@18.8.0"
     }
   }
