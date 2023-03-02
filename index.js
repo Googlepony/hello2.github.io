@@ -16,29 +16,48 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.post('/convert', upload.single('pdf'), async (req, res) => {
-    const pdfPath = req.file.path;
-
-    const stream = tabula(pdfPath, { pages: 'all' }, { area: '80, 30, 1080 , 810' }).streamCsv();
+app.post('/convert', async (req, res) => {
+    const pdfFile = req.files.pdf;
+    const stream = tabula(pdfFile.path, { pages: "all" }, { area: "80, 30, 1080 , 810" }).streamCsv();
     const fileStream = stream.fork();
-
-    try {
+    await new Promise((resolve, reject) => {
         let csvData = '';
-        fileStream.on('data', (chunk) => (csvData += chunk));
+        fileStream.on('data', chunk => csvData += chunk);
         fileStream.on('end', () => {
             res.setHeader('Content-Type', 'text/csv');
             res.setHeader('Content-Disposition', 'attachment; filename=merged.csv');
+            console.log(csvData);
             res.send(csvData);
+            resolve();
         });
-        fileStream.on('error', (err) => {
-            console.error(err);
-            res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
-    }
+        fileStream.on('error', (err) => reject(err));
+    });
 });
+
+
+// app.post('/convert', async (req, res) => {
+//     const pdfFile = req.files.pdf;
+
+//     const stream = tabula(pdfPath, { pages: 'all' }, { area: '80, 30, 1080 , 810' }).streamCsv();
+//     const fileStream = stream.fork();
+
+//     try {
+//         let csvData = '';
+//         fileStream.on('data', (chunk) => (csvData += chunk));
+//         fileStream.on('end', () => {
+//             res.setHeader('Content-Type', 'text/csv');
+//             res.setHeader('Content-Disposition', 'attachment; filename=merged.csv');
+//             res.send(csvData);
+//         });
+//         fileStream.on('error', (err) => {
+//             console.error(err);
+//             res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
+//         });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
+//     }
+// });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
