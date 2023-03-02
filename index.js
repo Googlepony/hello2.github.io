@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const app = express();
-const tmpDir = path.join(os.tmpdir(), 'uploads');
+const tmpDir = '/tmp/uploads';
 if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
 }
