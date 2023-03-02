@@ -21,7 +21,7 @@ app.post('/convert', async (req, res) => {
     fs.writeFileSync(filePath, pdfData, 'binary');
 
     // Use tabula to extract CSV data from the PDF
-    const table = await tabula(filePath, { output: csvPath, format: 'csv' });
+    const table = await tabula(filePath, { output: csvPath, format: 'csv' }).streamCsv();
 
     // Read the CSV data from the file
     const csvData = fs.readFileSync(csvPath, 'utf-8');
