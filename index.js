@@ -10,6 +10,9 @@ if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
 }
 app.use(fileUpload());
+app.get('/', (req, res) => {
+    res.send('Get - Working');
+});
 app.post('/upload', (req, res) => {
     const files = req.files;
     if (!files) {
