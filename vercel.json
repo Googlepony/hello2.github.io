@@ -1,7 +1,17 @@
+
 {
-  "functions": {
-    "api/index.js": {
-      "name": "pdfticsv"
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/upload",
+      "methods": ["POST"],
+      "dest": "index.js"
+    }
+  ]
 }
