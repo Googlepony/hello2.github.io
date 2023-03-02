@@ -1,4 +1,5 @@
-
+const { spawn } = require('child_process');
+const child = spawn('dir', [], { shell: true });
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const tabula = require('tabula-js');
