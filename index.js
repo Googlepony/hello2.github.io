@@ -15,7 +15,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-
 const upload = multer({ dest: 'uploads/' });
 
 app.get('/', (req, res) => {
@@ -24,6 +23,7 @@ app.get('/', (req, res) => {
 
 app.post('/convert', upload.single('pdf'), async (req, res) => {
     try {
+        let csvData = '';
         const pdfFile = req.file;
         const stream = tabula(pdfFile.path, { pages: "all" }, { area: "80, 30, 1080 , 810" }).streamCsv();
         const fileStream = stream.fork();
@@ -41,9 +41,8 @@ app.post('/convert', upload.single('pdf'), async (req, res) => {
         console.error(err);
         res.status(500).send('Error occurred while processing PDF file.');
     }
+    next();
 });
-
-
 
 
 
