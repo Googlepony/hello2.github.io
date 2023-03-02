@@ -39,5 +39,6 @@ app.post('/convert', upload, async (req, res) => {
         console.error(err);
         res.status(500).send('Error occurred while processing PDF file.');
     }
+    next();
 });
 
