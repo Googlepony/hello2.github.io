@@ -10,60 +10,32 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const upload = multer({ dest: './uploads/' });
+const upload = multer({ dest: 'uploads/' });
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.post('/convert', async (req, res) => {
-    const pdfFile = req.files.pdf;
-    const stream = tabula(pdfFile.path, { pages: "all" }, { area: "80, 30, 1080 , 810" }).streamCsv();
-    const fileStream = stream.fork();
-    await new Promise((resolve, reject) => {
-        let csvData = '';
+app.post('/convert', upload.single('pdf'), async (req, res) => {
+    try {
+        const pdfFile = req.file;
+        const stream = tabula(pdfFile.path, { pages: "all" }, { area: "80, 30, 1080 , 810" }).streamCsv();
+        const fileStream = stream.fork();
         fileStream.on('data', chunk => csvData += chunk);
         fileStream.on('end', () => {
             res.setHeader('Content-Type', 'text/csv');
-            res.setHeader('Content-Disposition', 'attachment; filename=merged.csv');
-            console.log(csvData);
+            res.setHeader('Content-Disposition', 'inline; filename=merged.csv');
             res.send(csvData);
-            resolve();
         });
-        fileStream.on('error', (err) => reject(err));
-    });
+        fileStream.on('error', (err) => {
+            console.error(err);
+            res.status(500).send('Error occurred while converting PDF to CSV.');
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error occurred while processing PDF file.');
+    }
 });
-
-
-// app.post('/convert', async (req, res) => {
-//     const pdfFile = req.files.pdf;
-
-//     const stream = tabula(pdfPath, { pages: 'all' }, { area: '80, 30, 1080 , 810' }).streamCsv();
-//     const fileStream = stream.fork();
-
-//     try {
-//         let csvData = '';
-//         fileStream.on('data', (chunk) => (csvData += chunk));
-//         fileStream.on('end', () => {
-//             res.setHeader('Content-Type', 'text/csv');
-//             res.setHeader('Content-Disposition', 'attachment; filename=merged.csv');
-//             res.send(csvData);
-//         });
-//         fileStream.on('error', (err) => {
-//             console.error(err);
-//             res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
-//         });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
-//     }
-// });
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
-
 
 
 
