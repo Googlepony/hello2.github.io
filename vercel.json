@@ -1,10 +1,18 @@
 {
-    "version": 2,
-    "builds": [
-      { "src": "index.js", "use": "@vercel/node" }
-    ],
-    "routes": [
-      { "src": "/hello", "methods": ["POST"], "dest": "index.js" }
-    ]
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/upload",
+      "methods": ["POST"],
+      "dest": "index.js"
+    }
+  ],
+  "env": {
+    "TMPDIR": "/tmp/uploads"
   }
-  
+}
