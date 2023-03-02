@@ -10,7 +10,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: './uploads/' });
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
