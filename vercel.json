@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/index": {
+    "api/index.js": {
       "runtime": "vercel-node@18.8.0"
     }
   }
