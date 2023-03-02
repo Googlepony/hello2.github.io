@@ -1,8 +1,6 @@
 const { spawn } = require('child_process');
-const child = spawn('dir', [], { shell: true });
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const tabula = require('tabula-js');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -30,9 +28,11 @@ app.post('/upload', (req, res) => {
         const outputPath = path.join(tmpDir, `${fileName}.csv`);
         file.mv(filePath, err => {
             if (err) { return res.status(500).send(err); }
-            const stream = tabula(filePath, { pages: "all", area: "80, 30, 1080 , 810" }).streamCsv();
-            stream.pipe(fs.createWriteStream(outputPath));
-            stream.on('end', () => {
+            const child = spawn('java', ['-jar', './node_modules/tabula-js/lib/tabula-java.jar', '--pages', 'all', '--area', '80, 30, 1080, 810', filePath, '--outfile', outputPath], { shell: true });
+            child.on('exit', (code, signal) => {
+                if (code !== 0) {
+                    return res.status(500).send(`Tabula-Java exited with code ${code}`);
+                }
                 fs.readFile(outputPath, 'utf-8', (err, data) => {
                     if (err) { return res.status(500).send(err); }
                     res.send(data);
@@ -42,7 +42,6 @@ app.post('/upload', (req, res) => {
     }
 });
 app.listen(process.env.PORT || 3000, () => console.log('Server started'));
-
 
 
 
