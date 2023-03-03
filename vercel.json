@@ -1,13 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "java/jdkDownload.sh", "use": "@now/static-build", "config": { "maxLambdaSize": "50mb" } },
     {
       "src": "index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["java/**"]
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -18,6 +14,9 @@
     }
   ],
   "env": {
-    "JAVA_HOME": "/vercel/path0/java/jdk"
+    "JAVA_HOME": "/opt/java/openjdk"
+  },
+  "dependencies": {
+    "tabula-js": "^1.0.1"
   }
 }

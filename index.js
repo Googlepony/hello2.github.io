@@ -84,7 +84,32 @@ app.listen(process.env.PORT || 3000, () => console.log('Server started'));
 //     ]
 //   }
 
+///////////////////
 
+// {
+//     "version": 2,
+//     "builds": [
+//       { "src": "java/jdkDownload.sh", "use": "@now/static-build", "config": { "maxLambdaSize": "50mb" } },
+//       {
+//         "src": "index.js",
+//         "use": "@vercel/node",
+//         "config": {
+//           "includeFiles": ["java/**"]
+//         }
+//       }
+//     ],
+//     "routes": [
+//       {
+//         "src": "/upload",
+//         "methods": ["POST"],
+//         "dest": "index.js"
+//       }
+//     ],
+//     "env": {
+//       "JAVA_HOME": "/vercel/path0/java/jdk"
+//     }
+//   }
+  
 
 
 // const { spawn } = require('child_process');
