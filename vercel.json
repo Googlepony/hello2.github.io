@@ -14,7 +14,7 @@
     }
   ],
   "env": {
-    "JAVA_HOME": "/opt/java/openjdk"
+    "JAVA_HOME": "/java/jdkDownload"
   },
   "dependencies": {
     "tabula-js": "^1.0.1"
