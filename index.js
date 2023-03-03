@@ -1,30 +1,23 @@
-const { spawn } = require('child_process');
 const express = require('express');
 const fileUpload = require('express-fileupload');
+const tabula = require('tabula-js');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const app = express();
 const tmpDir = '/tmp/uploads';
-
 if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
 }
-
 app.use(fileUpload());
-
 app.get('/', (req, res) => {
     res.send('Get - Working');
 });
-
 app.post('/upload', (req, res) => {
     const files = req.files;
     if (!files) {
         return res.status(400).send('No files were uploaded.');
     }
-
-    const javaPath = 'C:\Program Files (x86)\Java'; // replace with the path to java on your system
-    const tabulaPath = './node_modules/tabula-js/lib/tabula-java.jar'; // replace with the path to the tabula jar file on your system
-
     for (const key in files) {
         const file = files[key];
         if (file.mimetype !== 'application/pdf') {
@@ -34,29 +27,86 @@ app.post('/upload', (req, res) => {
         const filePath = path.join(tmpDir, fileName);
         const outputPath = path.join(tmpDir, `${fileName}.csv`);
         file.mv(filePath, err => {
-            if (err) {
-                return res.status(500).send(err);
-            }
-            const child = spawn(javaPath, ['-jar', tabulaPath, '--pages', 'all', '--area', '80, 30, 1080, 810', filePath, '--outfile', outputPath], { shell: true });
-            child.on('error', (err) => {
-                return res.status(500).send(`Error running Tabula-Java: ${err}`);
-            });
-            child.on('exit', (code, signal) => {
-                if (code !== 0) {
-                    return res.status(500).send(`Tabula-Java exited with code ${code}`);
-                }
+            if (err) { return res.status(500).send(err); }
+            const stream = tabula(filePath, { pages: "all", area: "80, 30, 1080 , 810" }).streamCsv();
+            stream.pipe(fs.createWriteStream(outputPath));
+            stream.on('end', () => {
                 fs.readFile(outputPath, 'utf-8', (err, data) => {
-                    if (err) {
-                        return res.status(500).send(err);
-                    }
+                    if (err) { return res.status(500).send(err); }
                     res.send(data);
                 });
             });
         });
     }
 });
-
 app.listen(process.env.PORT || 3000, () => console.log('Server started'));
+
+
+
+
+
+
+
+
+// const { spawn } = require('child_process');
+// const express = require('express');
+// const fileUpload = require('express-fileupload');
+// const fs = require('fs');
+// const path = require('path');
+// const app = express();
+// const tmpDir = '/tmp/uploads';
+
+// if (!fs.existsSync(tmpDir)) {
+//     fs.mkdirSync(tmpDir);
+// }
+
+// app.use(fileUpload());
+
+// app.get('/', (req, res) => {
+//     res.send('Get - Working');
+// });
+
+// app.post('/upload', (req, res) => {
+//     const files = req.files;
+//     if (!files) {
+//         return res.status(400).send('No files were uploaded.');
+//     }
+
+//     const javaPath = 'C:\Program Files (x86)\Java'; // replace with the path to java on your system
+//     const tabulaPath = './node_modules/tabula-js/lib/tabula-java.jar'; // replace with the path to the tabula jar file on your system
+
+//     for (const key in files) {
+//         const file = files[key];
+//         if (file.mimetype !== 'application/pdf') {
+//             return res.status(400).send('Only PDF files are allowed.');
+//         }
+//         const fileName = `${file.name}-${Date.now()}`;
+//         const filePath = path.join(tmpDir, fileName);
+//         const outputPath = path.join(tmpDir, `${fileName}.csv`);
+//         file.mv(filePath, err => {
+//             if (err) {
+//                 return res.status(500).send(err);
+//             }
+//             const child = spawn(javaPath, ['-jar', tabulaPath, '--pages', 'all', '--area', '80, 30, 1080, 810', filePath, '--outfile', outputPath], { shell: true });
+//             child.on('error', (err) => {
+//                 return res.status(500).send(`Error running Tabula-Java: ${err}`);
+//             });
+//             child.on('exit', (code, signal) => {
+//                 if (code !== 0) {
+//                     return res.status(500).send(`Tabula-Java exited with code ${code}`);
+//                 }
+//                 fs.readFile(outputPath, 'utf-8', (err, data) => {
+//                     if (err) {
+//                         return res.status(500).send(err);
+//                     }
+//                     res.send(data);
+//                 });
+//             });
+//         });
+//     }
+// });
+
+// app.listen(process.env.PORT || 3000, () => console.log('Server started'));
 
 
 
