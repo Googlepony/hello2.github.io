@@ -1,13 +1,13 @@
 {
   "version": 2,
   "builds": [
+    { "src": "java/jdkDownload.sh", "use": "@now/static-build", "config": { "maxLambdaSize": "50mb" } },
     {
       "src": "index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "**/*.jar",
-      "use": "@vercel/java"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["java/**"]
+      }
     }
   ],
   "routes": [
@@ -16,5 +16,8 @@
       "methods": ["POST"],
       "dest": "index.js"
     }
-  ]
+  ],
+  "env": {
+    "JAVA_HOME": "/vercel/path0/java/jdk"
+  }
 }

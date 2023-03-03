@@ -43,7 +43,46 @@ app.listen(process.env.PORT || 3000, () => console.log('Server started'));
 
 
 
+// {
+//     "version": 2,
+//     "builds": [
+//       {
+//         "src": "index.js",
+//         "use": "@vercel/node"
+//       }
+//     ],
+//     "routes": [
+//       {
+//         "src": "/upload",
+//         "methods": ["POST"],
+//         "dest": "index.js"
+//       }
+//     ]
+//   }
+  
+////////////
 
+
+// {
+//     "version": 2,
+//     "builds": [
+//       {
+//         "src": "index.js",
+//         "use": "@vercel/node"
+//       },
+//       {
+//         "src": "**/*.jar",
+//         "use": "@vercel/java"
+//       }
+//     ],
+//     "routes": [
+//       {
+//         "src": "/upload",
+//         "methods": ["POST"],
+//         "dest": "index.js"
+//       }
+//     ]
+//   }
 
 
 
